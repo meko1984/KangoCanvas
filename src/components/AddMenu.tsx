@@ -79,15 +79,27 @@ export function AddMenu({
     if (!menu) return;
 
     const viewportMargin = 12;
+    const bottomSafeArea = 72;
     const keepInsideViewport = () => {
       const bounds = menu.getBoundingClientRect();
+      const viewport = window.visualViewport;
+      const viewportLeft = viewport?.offsetLeft ?? 0;
+      const viewportTop = viewport?.offsetTop ?? 0;
+      const viewportWidth = viewport?.width ?? window.innerWidth;
+      const viewportHeight = viewport?.height ?? window.innerHeight;
       const left = Math.max(
-        viewportMargin,
-        Math.min(x, window.innerWidth - bounds.width - viewportMargin),
+        viewportLeft + viewportMargin,
+        Math.min(
+          x,
+          viewportLeft + viewportWidth - bounds.width - viewportMargin,
+        ),
       );
       const top = Math.max(
-        viewportMargin,
-        Math.min(y, window.innerHeight - bounds.height - viewportMargin),
+        viewportTop + viewportMargin,
+        Math.min(
+          y,
+          viewportTop + viewportHeight - bounds.height - bottomSafeArea,
+        ),
       );
 
       setPosition((current) =>
@@ -101,10 +113,14 @@ export function AddMenu({
     const resizeObserver = new ResizeObserver(keepInsideViewport);
     resizeObserver.observe(menu);
     window.addEventListener("resize", keepInsideViewport);
+    window.visualViewport?.addEventListener("resize", keepInsideViewport);
+    window.visualViewport?.addEventListener("scroll", keepInsideViewport);
 
     return () => {
       resizeObserver.disconnect();
       window.removeEventListener("resize", keepInsideViewport);
+      window.visualViewport?.removeEventListener("resize", keepInsideViewport);
+      window.visualViewport?.removeEventListener("scroll", keepInsideViewport);
     };
   }, [x, y]);
 
