@@ -1,7 +1,7 @@
 :root {
   font-family:
-    "Yu Gothic UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP", system-ui,
-    sans-serif;
+    "Yu Gothic", "Yu Gothic UI", "Hiragino Kaku Gothic ProN", "Noto Sans JP",
+    system-ui, sans-serif;
   color: #17211b;
   background: #f4f7f4;
   font-synthesis: none;
@@ -105,7 +105,7 @@ textarea:focus-visible {
   border-radius: 13px;
   background: var(--brand);
   color: white;
-  font-family: Georgia, serif;
+  font-family: inherit;
   font-size: 1.45rem;
   font-weight: 800;
   box-shadow: 0 7px 18px rgba(47, 118, 83, 0.18);
@@ -136,7 +136,7 @@ textarea:focus-visible {
 
 .dashboard-header h1 {
   margin: 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: inherit;
   font-size: 1.35rem;
   letter-spacing: -0.02em;
 }
@@ -256,7 +256,7 @@ textarea:focus-visible {
 
 .section-heading h2 {
   margin: 6px 0 0;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: inherit;
   font-size: clamp(1.6rem, 3vw, 2.35rem);
   font-weight: 500;
   letter-spacing: -0.025em;
@@ -469,7 +469,7 @@ textarea:focus-visible {
 
 .modal-card h2 {
   margin: 6px 0 25px;
-  font-family: Georgia, "Times New Roman", serif;
+  font-family: inherit;
   font-size: 1.8rem;
   font-weight: 500;
 }
@@ -1016,7 +1016,7 @@ textarea:focus-visible {
 .add-menu {
   position: fixed;
   z-index: 700;
-  width: min(600px, calc(100vw - 24px));
+  width: min(780px, calc(100vw - 24px));
   overflow: hidden;
   border: 1px solid #cdd8d0;
   border-radius: 14px;
@@ -1045,6 +1045,23 @@ textarea:focus-visible {
   background: transparent;
 }
 
+.manage-items-button {
+  min-height: 30px;
+  padding: 5px 9px;
+  border: 1px solid #cad7ce;
+  border-radius: 7px;
+  background: white;
+  color: #486153;
+  font-size: 0.68rem;
+  white-space: nowrap;
+}
+
+.manage-items-button.active {
+  border-color: #2f7653;
+  background: #eaf4ed;
+  color: #235c40;
+}
+
 .icon-button {
   width: 30px;
   height: 30px;
@@ -1055,8 +1072,8 @@ textarea:focus-visible {
 
 .add-menu-columns {
   display: grid;
-  min-height: 310px;
-  grid-template-columns: 210px 1fr;
+  min-height: 380px;
+  grid-template-columns: 180px 210px 1fr;
 }
 
 .category-column {
@@ -1077,6 +1094,11 @@ textarea:focus-visible {
   border-radius: 8px;
   background: transparent;
   text-align: left;
+}
+
+.subcategory-list button > span:last-child {
+  margin-left: auto;
+  color: #9aa49e;
 }
 
 .category-column button > span:last-child {
@@ -1106,6 +1128,7 @@ textarea:focus-visible {
   min-width: 0;
   grid-template-rows: auto 1fr auto;
   padding: 10px;
+  border-right: 1px solid var(--line);
 }
 
 .menu-column-title {
@@ -1125,6 +1148,10 @@ textarea:focus-visible {
   gap: 3px;
   overflow: auto;
   padding-right: 2px;
+}
+
+.subcategory-list.single-column {
+  grid-template-columns: 1fr;
 }
 
 .subcategory-list button {
@@ -1155,6 +1182,146 @@ textarea:focus-visible {
   display: block;
 }
 
+.catalog-item-column {
+  display: grid;
+  min-width: 0;
+  grid-template-rows: auto 1fr auto;
+  padding: 10px;
+}
+
+.catalog-item-list {
+  align-content: start;
+  overflow: auto;
+  padding-right: 3px;
+}
+
+.catalog-item-row,
+.search-result-row {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  border-bottom: 1px solid #eef2ef;
+}
+
+.catalog-item-row > button:first-child {
+  flex: 1;
+  min-height: 38px;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 7px;
+  background: transparent;
+  text-align: left;
+  font-size: 0.75rem;
+}
+
+.catalog-item-row > button:first-child:hover {
+  background: #f1f6f2;
+}
+
+.catalog-row-actions {
+  display: flex;
+  gap: 3px;
+}
+
+.catalog-row-actions button,
+.item-edit-button {
+  min-height: 27px;
+  padding: 4px 6px;
+  border: 1px solid #dce4de;
+  border-radius: 6px;
+  background: white;
+  color: #657168;
+  font-size: 0.61rem;
+}
+
+.catalog-empty-note {
+  display: grid;
+  min-height: 90px;
+  place-items: center;
+  color: #879189;
+  font-size: 0.72rem;
+  text-align: center;
+}
+
+.catalog-empty-note.large {
+  min-height: 280px;
+}
+
+.catalog-management-actions {
+  display: grid;
+  gap: 5px;
+  margin-top: 8px;
+}
+
+.catalog-management-actions button {
+  min-height: 34px;
+  border: 1px solid #d8e1da;
+  border-radius: 8px;
+  background: white;
+  color: #5d6a62;
+  font-size: 0.68rem;
+}
+
+.catalog-management-actions .add-custom-item {
+  border-color: #bcd5c3;
+  background: #edf6ef;
+  color: #2d6140;
+  font-weight: 800;
+}
+
+.catalog-item-form {
+  display: grid;
+  align-content: start;
+  gap: 9px;
+  overflow: auto;
+  padding: 4px 2px;
+}
+
+.catalog-item-form label {
+  display: grid;
+  gap: 4px;
+  color: #657168;
+  font-size: 0.66rem;
+  font-weight: 750;
+}
+
+.catalog-item-form input,
+.catalog-item-form select {
+  min-height: 36px;
+  padding: 7px 8px;
+  border: 1px solid #d7e0d9;
+  border-radius: 7px;
+  background: white;
+  color: var(--ink);
+  font-size: 0.73rem;
+}
+
+.catalog-form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 6px;
+  margin-top: 3px;
+}
+
+.catalog-form-actions button {
+  min-height: 34px;
+  padding: 6px 10px;
+  border: 1px solid #d7e0d9;
+  border-radius: 7px;
+  background: white;
+  font-size: 0.7rem;
+}
+
+.catalog-form-actions .primary-small-button {
+  border-color: #2f7653;
+  background: #2f7653;
+  color: white;
+}
+
+.catalog-form-actions button:disabled {
+  opacity: 0.45;
+}
+
 .free-input-button small {
   margin-top: 2px;
   color: #6b8373;
@@ -1179,9 +1346,9 @@ textarea:focus-visible {
   padding: 8px;
 }
 
-.search-results > button {
+.search-result-row > button:first-child {
   display: flex;
-  width: 100%;
+  flex: 1;
   align-items: center;
   gap: 10px;
   padding: 10px;
@@ -1191,7 +1358,7 @@ textarea:focus-visible {
   text-align: left;
 }
 
-.search-results > button:hover {
+.search-result-row > button:first-child:hover {
   background: #f2f7f3;
 }
 
@@ -1448,7 +1615,12 @@ textarea:focus-visible {
   }
 
   .add-menu-columns {
-    grid-template-columns: 145px 1fr;
+    min-width: 620px;
+    grid-template-columns: 135px 155px 1fr;
+  }
+
+  .add-menu {
+    overflow-x: auto;
   }
 
   .category-column button,

@@ -761,7 +761,7 @@ function EditorCanvas({
         const headerElement = window.document.createElement("div");
         headerElement.className = "pdf-header-render";
         headerElement.style.cssText =
-          "position:fixed;left:-9999px;top:0;background:white;color:#17211b;padding:12px 18px;font-family:sans-serif;display:flex;justify-content:space-between;width:1800px;";
+          "position:fixed;left:-9999px;top:0;background:white;color:#17211b;padding:12px 18px;font-family:'Yu Gothic','Yu Gothic UI',sans-serif;display:flex;justify-content:space-between;width:1800px;";
         headerElement.innerHTML = `<strong>${escapeHtml(document.title)}</strong><span>${
           paper.showDate ? new Date().toLocaleDateString("ja-JP") : ""
         }</span>`;
