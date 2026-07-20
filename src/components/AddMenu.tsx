@@ -1,4 +1,4 @@
-import { useMemo, useState } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
   loadCatalogPreferences,
   removeCatalogItem,
@@ -38,6 +38,8 @@ export function AddMenu({
   onAdd,
   onClose,
 }: AddMenuProps) {
+  const menuRef = useRef<HTMLDivElement>(null);
+  const [position, setPosition] = useState({ left: x, top: y });
   const [activeCategory, setActiveCategory] =
     useState<CategoryId>(initialCategory);
   const [activeSubcategory, setActiveSubcategory] = useState<string>();
@@ -71,6 +73,40 @@ export function AddMenu({
       ),
     [activeCategory, activeSubcategory, catalogItems],
   );
+
+  useLayoutEffect(() => {
+    const menu = menuRef.current;
+    if (!menu) return;
+
+    const viewportMargin = 12;
+    const keepInsideViewport = () => {
+      const bounds = menu.getBoundingClientRect();
+      const left = Math.max(
+        viewportMargin,
+        Math.min(x, window.innerWidth - bounds.width - viewportMargin),
+      );
+      const top = Math.max(
+        viewportMargin,
+        Math.min(y, window.innerHeight - bounds.height - viewportMargin),
+      );
+
+      setPosition((current) =>
+        current.left === left && current.top === top
+          ? current
+          : { left, top },
+      );
+    };
+
+    keepInsideViewport();
+    const resizeObserver = new ResizeObserver(keepInsideViewport);
+    resizeObserver.observe(menu);
+    window.addEventListener("resize", keepInsideViewport);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", keepInsideViewport);
+    };
+  }, [x, y]);
 
   const applyPreferences = (
     next: ReturnType<typeof loadCatalogPreferences>,
@@ -147,11 +183,9 @@ export function AddMenu({
 
   return (
     <div
+      ref={menuRef}
       className="add-menu"
-      style={{
-        left: `min(${x}px, calc(100vw - 800px))`,
-        top: `min(${y}px, calc(100vh - 560px))`,
-      }}
+      style={{ left: position.left, top: position.top }}
       role="dialog"
       aria-label="項目を追加"
       onPointerDown={(event) => event.stopPropagation()}
