@@ -2,6 +2,8 @@
 
 看護学生向けの、自由配置型看護関連図Webアプリです。
 
+Web版: https://meko1984.github.io/KangoCanvas/
+
 ## 現在の構成
 
 - ブラウザ内だけに関連図を自動保存
