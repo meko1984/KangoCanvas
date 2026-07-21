@@ -28,6 +28,7 @@ import {
   useMemo,
   useRef,
   useState,
+  type PointerEvent as ReactPointerEvent,
 } from "react";
 import { CATEGORY_COLORS, getCategory } from "../catalog";
 import {
@@ -111,6 +112,13 @@ function EditorCanvas({
   }>({ past: [], future: [] });
   const saveTimer = useRef<number | undefined>(undefined);
   const flowWrapper = useRef<HTMLDivElement>(null);
+  const longPressTimer = useRef<number | undefined>(undefined);
+  const longPressStart = useRef<{
+    x: number;
+    y: number;
+    pointerId: number;
+  } | undefined>(undefined);
+  const longPressOpened = useRef(false);
   const {
     screenToFlowPosition,
     fitView,
@@ -692,6 +700,11 @@ function EditorCanvas({
     undo,
   ]);
 
+  useEffect(
+    () => () => window.clearTimeout(longPressTimer.current),
+    [],
+  );
+
   const exportBackup = async () => {
     const next = buildDocument({ lastBackedUpAt: new Date().toISOString() });
     await saveDiagram(next);
@@ -791,6 +804,68 @@ function EditorCanvas({
       setNotice("PDFの作成に失敗しました。もう一度お試しください。");
     } finally {
       setPdfBusy(false);
+    }
+  };
+
+  const openAddMenuAt = (clientX: number, clientY: number) => {
+    const flow = screenToFlowPosition({ x: clientX, y: clientY });
+    if (continuous) {
+      addNodeAt(flow, {
+        category: continuous.category,
+        subcategory: continuous.subcategory,
+      });
+      return;
+    }
+    setMenu({
+      screenX: clientX,
+      screenY: clientY,
+      flowX: flow.x,
+      flowY: flow.y,
+    });
+  };
+
+  const cancelLongPress = () => {
+    window.clearTimeout(longPressTimer.current);
+    longPressTimer.current = undefined;
+    longPressStart.current = undefined;
+  };
+
+  const startLongPress = (event: ReactPointerEvent<HTMLDivElement>) => {
+    if (event.pointerType !== "touch") return;
+    const target = event.target as Element;
+    if (
+      target.closest(
+        ".react-flow__node, .react-flow__edge, button, input, textarea, select",
+      )
+    ) {
+      return;
+    }
+    if (longPressStart.current) {
+      cancelLongPress();
+      return;
+    }
+
+    const start = {
+      x: event.clientX,
+      y: event.clientY,
+      pointerId: event.pointerId,
+    };
+    longPressStart.current = start;
+    longPressTimer.current = window.setTimeout(() => {
+      longPressOpened.current = true;
+      openAddMenuAt(start.x, start.y);
+      longPressTimer.current = undefined;
+      longPressStart.current = undefined;
+    }, 550);
+  };
+
+  const moveLongPress = (event: ReactPointerEvent<HTMLDivElement>) => {
+    const start = longPressStart.current;
+    if (!start || start.pointerId !== event.pointerId) return;
+    if (
+      Math.hypot(event.clientX - start.x, event.clientY - start.y) > 10
+    ) {
+      cancelLongPress();
     }
   };
 
@@ -962,6 +1037,10 @@ function EditorCanvas({
         <div
           className="flow-wrapper"
           ref={flowWrapper}
+          onPointerDownCapture={startLongPress}
+          onPointerMoveCapture={moveLongPress}
+          onPointerUpCapture={cancelLongPress}
+          onPointerCancelCapture={cancelLongPress}
         >
           <ReactFlow<DiagramNode, DiagramEdge>
             nodes={nodes}
@@ -973,29 +1052,17 @@ function EditorCanvas({
             onConnect={onConnect}
             onNodeDragStart={pushHistory}
             onPaneClick={(event) => {
+              if (longPressOpened.current) {
+                longPressOpened.current = false;
+                return;
+              }
               setShowArrange(false);
               setShowMore(false);
               setMenu(undefined);
             }}
             onPaneContextMenu={(event) => {
               event.preventDefault();
-              const flow = screenToFlowPosition({
-                x: event.clientX,
-                y: event.clientY,
-              });
-              if (continuous) {
-                addNodeAt(flow, {
-                  category: continuous.category,
-                  subcategory: continuous.subcategory,
-                });
-                return;
-              }
-              setMenu({
-                screenX: event.clientX,
-                screenY: event.clientY,
-                flowX: flow.x,
-                flowY: flow.y,
-              });
+              openAddMenuAt(event.clientX, event.clientY);
             }}
             onMoveEnd={(_, viewport) => {
               viewportRef.current = viewport;
@@ -1075,7 +1142,12 @@ function EditorCanvas({
         </div>
 
         <div className="editor-tip">
-          左ドラッグで画面移動。右クリックで項目追加。ボックス周囲の＋から別のボックスへドラッグすると線を作れます。
+          <span className="desktop-tip">
+            左ドラッグで画面移動。右クリックで項目追加。ボックス周囲の＋から別のボックスへドラッグすると線を作れます。
+          </span>
+          <span className="touch-tip">
+            空白を長押しして項目追加・2本指で移動と拡大縮小
+          </span>
         </div>
       </main>
 

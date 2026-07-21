@@ -79,7 +79,9 @@ export function AddMenu({
     if (!menu) return;
 
     const viewportMargin = 12;
-    const bottomSafeArea = 72;
+    const bottomSafeArea = window.matchMedia("(pointer: coarse)").matches
+      ? 20
+      : 72;
     const keepInsideViewport = () => {
       const bounds = menu.getBoundingClientRect();
       const viewport = window.visualViewport;

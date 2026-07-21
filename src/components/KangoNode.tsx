@@ -60,6 +60,9 @@ export function KangoNode({
         position={Position.Top}
         className="node-toolbar"
       >
+        <button onClick={() => actions.updateNode(id, { editing: true })}>
+          文字編集
+        </button>
         <label className="toolbar-field">
           <span>分類</span>
           <select

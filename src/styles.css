@@ -739,6 +739,8 @@ textarea:focus-visible {
 .flow-wrapper {
   position: relative;
   min-height: 0;
+  -webkit-touch-callout: none;
+  user-select: none;
 }
 
 .react-flow {
@@ -1417,6 +1419,10 @@ textarea:focus-visible {
   pointer-events: none;
 }
 
+.touch-tip {
+  display: none;
+}
+
 .small-modal p {
   color: var(--muted);
   font-size: 0.82rem;
@@ -1620,12 +1626,17 @@ textarea:focus-visible {
 
   .add-menu {
     width: calc(100vw - 16px);
-    max-height: calc(100dvh - 92px);
+    max-height: calc(100dvh - 32px);
   }
 
   .add-menu-columns {
+    height: min(480px, calc(100dvh - 120px));
     grid-template-columns: 135px 155px minmax(300px, 1fr);
     overflow-x: auto;
+  }
+
+  .search-results {
+    height: min(380px, calc(100dvh - 120px));
   }
 
   .category-column button,
@@ -1645,11 +1656,25 @@ textarea:focus-visible {
 
   .node-toolbar button,
   .node-toolbar select {
+    min-height: 40px;
     white-space: nowrap;
   }
 
   .editor-tip {
+    bottom: 8px;
+    display: block;
+    width: max-content;
+    max-width: calc(100vw - 24px);
+    font-size: 0.62rem;
+    text-align: center;
+  }
+
+  .desktop-tip {
     display: none;
+  }
+
+  .touch-tip {
+    display: inline;
   }
 
   .react-flow__minimap {
@@ -1676,7 +1701,7 @@ textarea:focus-visible {
   }
 
   .add-menu-columns {
-    grid-template-columns: 118px 1fr;
+    grid-template-columns: 112px 140px minmax(220px, 1fr);
   }
 
   .category-column,
@@ -1692,6 +1717,18 @@ textarea:focus-visible {
   .category-swatch {
     width: 12px;
     height: 12px;
+  }
+
+  .plus-handle {
+    width: 30px !important;
+    min-width: 30px !important;
+    height: 30px !important;
+    min-height: 30px !important;
+  }
+
+  .plus-handle::after {
+    width: 26px;
+    height: 26px;
   }
 
   .pdf-fields {
