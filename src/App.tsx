@@ -1,16 +1,27 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  getInitialAppMode,
+  rememberDevelopmentMode,
+  TRIAL_DOCUMENT_ID,
+  type AppMode,
+} from "./app-mode";
 import { Dashboard } from "./components/Dashboard";
 import { Editor } from "./components/Editor";
 import { createSampleDiagram } from "./sample";
 import {
+  createEmptyDiagram,
   deleteDiagram,
+  getDiagram,
   listDiagrams,
   saveDiagram,
 } from "./storage";
 import type { DiagramDocument } from "./types";
 
 export default function App() {
+  const [mode, setMode] = useState<AppMode>(getInitialAppMode);
   const [diagrams, setDiagrams] = useState<DiagramDocument[]>([]);
+  const [trialDocument, setTrialDocument] = useState<DiagramDocument>();
+  const [trialRevision, setTrialRevision] = useState(0);
   const [activeId, setActiveId] = useState<string>();
   const [loading, setLoading] = useState(true);
   const [deleted, setDeleted] = useState<DiagramDocument>();
@@ -19,28 +30,50 @@ export default function App() {
 
   useEffect(() => {
     const load = async () => {
-      let stored = await listDiagrams();
-      if (
-        !stored.length &&
-        localStorage.getItem("kango-canvas-sample-created") !== "yes"
-      ) {
-        const sample = createSampleDiagram();
-        await saveDiagram(sample);
-        localStorage.setItem("kango-canvas-sample-created", "yes");
-        stored = [sample];
+      setLoading(true);
+      setActiveId(undefined);
+
+      if (mode === "trial") {
+        let stored = await getDiagram(TRIAL_DOCUMENT_ID);
+        if (!stored) {
+          stored = createTrialDocument();
+          await saveDiagram(stored);
+        }
+        setTrialDocument(stored);
+      } else {
+        let stored = (await listDiagrams()).filter(
+          (diagram) => diagram.id !== TRIAL_DOCUMENT_ID,
+        );
+        if (
+          !stored.length &&
+          localStorage.getItem("kango-canvas-sample-created") !== "yes"
+        ) {
+          const sample = createSampleDiagram();
+          await saveDiagram(sample);
+          localStorage.setItem("kango-canvas-sample-created", "yes");
+          stored = [sample];
+        }
+        setDiagrams(stored);
       }
-      setDiagrams(stored);
+
       setLoading(false);
     };
     void load();
-  }, []);
+  }, [mode]);
 
   const activeDocument = useMemo(
-    () => diagrams.find((diagram) => diagram.id === activeId),
-    [activeId, diagrams],
+    () =>
+      mode === "trial"
+        ? trialDocument
+        : diagrams.find((diagram) => diagram.id === activeId),
+    [activeId, diagrams, mode, trialDocument],
   );
 
   const upsert = useCallback((document: DiagramDocument) => {
+    if (document.id === TRIAL_DOCUMENT_ID) {
+      setTrialDocument(document);
+      return;
+    }
     setDiagrams((current) =>
       [document, ...current.filter((item) => item.id !== document.id)].sort(
         (a, b) =>
@@ -53,6 +86,13 @@ export default function App() {
     await saveDiagram(document);
     upsert(document);
     setActiveId(document.id);
+  };
+
+  const resetTrial = async () => {
+    const next = createTrialDocument();
+    await saveDiagram(next);
+    setTrialDocument(next);
+    setTrialRevision((current) => current + 1);
   };
 
   const remove = async (document: DiagramDocument) => {
@@ -105,6 +145,11 @@ export default function App() {
     upsert(sample);
   };
 
+  const changeMode = (next: AppMode) => {
+    rememberDevelopmentMode(next);
+    setMode(next);
+  };
+
   if (loading) {
     return (
       <div className="app-loading">
@@ -116,12 +161,21 @@ export default function App() {
 
   if (activeDocument) {
     return (
-      <Editor
-        key={activeDocument.id}
-        document={activeDocument}
-        onBack={() => setActiveId(undefined)}
-        onDocumentChange={upsert}
-      />
+      <>
+        <Editor
+          key={
+            mode === "trial"
+              ? `${activeDocument.id}:${trialRevision}`
+              : activeDocument.id
+          }
+          mode={mode}
+          document={activeDocument}
+          onBack={() => setActiveId(undefined)}
+          onResetTrial={() => void resetTrial()}
+          onDocumentChange={upsert}
+        />
+        <DevelopmentModeSwitcher mode={mode} onChange={changeMode} />
+      </>
     );
   }
 
@@ -135,6 +189,7 @@ export default function App() {
         onDuplicate={(document) => void duplicate(document)}
         onRestoreSample={() => void restoreSample()}
       />
+      <DevelopmentModeSwitcher mode={mode} onChange={changeMode} />
       {deleted && (
         <div className="toast">
           「{deleted.title}」を削除しました
@@ -164,5 +219,38 @@ export default function App() {
         </div>
       )}
     </>
+  );
+}
+
+function createTrialDocument(): DiagramDocument {
+  const document = createEmptyDiagram("お試し関連図", "未分類");
+  return { ...document, id: TRIAL_DOCUMENT_ID };
+}
+
+function DevelopmentModeSwitcher({
+  mode,
+  onChange,
+}: {
+  mode: AppMode;
+  onChange: (mode: AppMode) => void;
+}) {
+  if (!import.meta.env.DEV) return null;
+
+  return (
+    <div className="development-mode-switcher" aria-label="開発確認モード">
+      <strong>開発確認</strong>
+      <button
+        className={mode === "trial" ? "active" : ""}
+        onClick={() => onChange("trial")}
+      >
+        お試し版
+      </button>
+      <button
+        className={mode === "product" ? "active" : ""}
+        onClick={() => onChange("product")}
+      >
+        製品版
+      </button>
+    </div>
   );
 }

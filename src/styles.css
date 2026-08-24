@@ -587,6 +587,36 @@ textarea:focus-visible {
   gap: 7px;
 }
 
+.trial-editor-brand {
+  display: flex;
+  min-width: 230px;
+  align-items: center;
+  gap: 9px;
+}
+
+.trial-editor-brand .brand-mark {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  font-size: 1.2rem;
+}
+
+.trial-editor-brand strong,
+.trial-editor-brand span {
+  display: block;
+}
+
+.trial-editor-brand strong {
+  font-size: 0.86rem;
+}
+
+.trial-editor-brand span {
+  margin-top: 2px;
+  color: #77837b;
+  font-size: 0.61rem;
+  white-space: nowrap;
+}
+
 .editor-header .back-button {
   width: 40px;
   height: 40px;
@@ -642,6 +672,52 @@ textarea:focus-visible {
   border-color: var(--brand);
   background: var(--brand);
   color: white;
+}
+
+.editor-header .locked-feature-button {
+  border-color: #d9c686;
+  background: #fff9e8;
+  color: #745e24;
+}
+
+.editor-header .trial-reset-button {
+  color: #9b3d3d;
+}
+
+.development-mode-switcher {
+  position: fixed;
+  z-index: 2000;
+  right: 12px;
+  bottom: 12px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 6px;
+  border: 1px solid #b8c8bd;
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.96);
+  box-shadow: 0 8px 26px rgba(31, 53, 40, 0.18);
+  font-size: 0.65rem;
+}
+
+.development-mode-switcher strong {
+  padding: 0 5px;
+  color: #637068;
+}
+
+.development-mode-switcher button {
+  min-height: 30px;
+  padding: 5px 8px;
+  border: 1px solid #d8e1da;
+  border-radius: 7px;
+  background: white;
+}
+
+.development-mode-switcher button.active {
+  border-color: var(--brand);
+  background: var(--brand);
+  color: white;
+  font-weight: 800;
 }
 
 .global-font-size,
@@ -1261,6 +1337,17 @@ textarea:focus-visible {
   min-height: 280px;
 }
 
+.trial-catalog-note {
+  margin-top: 8px;
+  padding: 10px;
+  border: 1px solid #dce7df;
+  border-radius: 9px;
+  background: #f6faf7;
+  color: #647269;
+  font-size: 0.68rem;
+  line-height: 1.55;
+}
+
 .catalog-management-actions {
   display: grid;
   gap: 5px;
@@ -1427,6 +1514,36 @@ textarea:focus-visible {
   color: var(--muted);
   font-size: 0.82rem;
   line-height: 1.7;
+}
+
+.product-info-dialog {
+  width: min(520px, 100%);
+}
+
+.product-info-dialog > p {
+  color: var(--muted);
+  font-size: 0.82rem;
+  line-height: 1.7;
+}
+
+.product-feature-list {
+  display: grid;
+  gap: 8px;
+  margin: 18px 0;
+  padding: 16px 18px 16px 36px;
+  border: 1px solid #d9e7dd;
+  border-radius: 11px;
+  background: #f3f8f4;
+  color: #345541;
+  font-size: 0.8rem;
+}
+
+.product-info-dialog .trial-data-note {
+  padding: 10px 12px;
+  border-radius: 8px;
+  background: #fff8e6;
+  color: #735f2c;
+  font-size: 0.73rem;
 }
 
 .pdf-dialog {
@@ -1611,6 +1728,14 @@ textarea:focus-visible {
     justify-content: space-between;
   }
 
+  .trial-editor-brand {
+    min-width: 0;
+  }
+
+  .trial-editor-brand span {
+    white-space: normal;
+  }
+
   .editor-title {
     width: calc(100vw - 90px);
   }
@@ -1739,6 +1864,7 @@ textarea:focus-visible {
 @media print {
   .editor-header,
   .editor-tip,
+  .development-mode-switcher,
   .react-flow__controls,
   .react-flow__minimap {
     display: none !important;
