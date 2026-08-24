@@ -4,7 +4,7 @@
 
 Web版（お試し版）: https://meko1984.github.io/KangoCanvas/
 
-現在のバージョン: `v0.2.0`
+現在のバージョン: `v0.2.1`
 
 ## 現在の構成
 

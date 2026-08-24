@@ -119,6 +119,7 @@ function EditorCanvas({
   }>({ past: [], future: [] });
   const saveTimer = useRef<number | undefined>(undefined);
   const flowWrapper = useRef<HTMLDivElement>(null);
+  const initialViewApplied = useRef(false);
   const longPressTimer = useRef<number | undefined>(undefined);
   const longPressStart = useRef<{
     x: number;
@@ -206,6 +207,9 @@ function EditorCanvas({
   }, [buildDocument, onDocumentChange]);
 
   useEffect(() => {
+    if (initialViewApplied.current) return;
+    initialViewApplied.current = true;
+
     requestAnimationFrame(() => {
       if (initialDocument.nodes.length) {
         void fitView({ padding: 0.18, duration: 450 });
