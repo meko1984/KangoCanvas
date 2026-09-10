@@ -31,7 +31,6 @@ import {
   type PointerEvent as ReactPointerEvent,
 } from "react";
 import { CATEGORY_COLORS, getCategory } from "../catalog";
-import type { AppMode } from "../app-mode";
 import {
   EditorActionsContext,
   type HandleSide,
@@ -53,10 +52,8 @@ import { KangoEdge } from "./KangoEdge";
 import { KangoNode } from "./KangoNode";
 
 interface EditorProps {
-  mode: AppMode;
   document: DiagramDocument;
   onBack: () => void;
-  onResetTrial: () => void;
   onDocumentChange: (document: DiagramDocument) => void;
 }
 
@@ -74,10 +71,8 @@ export function Editor(props: EditorProps) {
 }
 
 function EditorCanvas({
-  mode,
   document: initialDocument,
   onBack,
-  onResetTrial,
   onDocumentChange,
 }: EditorProps) {
   const [document, setDocument] = useState(initialDocument);
@@ -108,8 +103,6 @@ function EditorCanvas({
   const [showMore, setShowMore] = useState(false);
   const [showPdf, setShowPdf] = useState(false);
   const [showFrame, setShowFrame] = useState(false);
-  const [showProductInfo, setShowProductInfo] = useState(false);
-  const [showResetTrial, setShowResetTrial] = useState(false);
   const [pdfBusy, setPdfBusy] = useState(false);
   const [notice, setNotice] = useState<string>();
   const viewportRef = useRef(initialDocument.viewport);
@@ -885,45 +878,33 @@ function EditorCanvas({
       <main className="editor-shell">
         <header className="editor-header">
           <div className="editor-header-left">
-            {mode === "product" ? (
-              <>
-                <button
-                  className="back-button"
-                  onClick={onBack}
-                  aria-label="一覧へ戻る"
-                >
-                  ←
-                </button>
-                <div className="editor-title-wrap">
-                  <input
-                    className="editor-title"
-                    aria-label="関連図のタイトル"
-                    value={document.title}
-                    onChange={(event) =>
-                      setDocument((current) => ({
-                        ...current,
-                        title: event.target.value,
-                      }))
-                    }
-                  />
-                  <span className={`save-status ${saveStatus}`}>
-                    {saveStatus === "saving"
-                      ? "保存中…"
-                      : saveStatus === "error"
-                        ? "保存できません"
-                        : "この端末に保存済み"}
-                  </span>
-                </div>
-              </>
-            ) : (
-              <div className="trial-editor-brand">
-                <div className="brand-mark">K</div>
-                <div>
-                  <strong>KangoCanvas</strong>
-                  <span>お試し版・作業中の1図を端末内に保持</span>
-                </div>
-              </div>
-            )}
+            <button
+              className="back-button"
+              onClick={onBack}
+              aria-label="一覧へ戻る"
+            >
+              ←
+            </button>
+            <div className="editor-title-wrap">
+              <input
+                className="editor-title"
+                aria-label="関連図のタイトル"
+                value={document.title}
+                onChange={(event) =>
+                  setDocument((current) => ({
+                    ...current,
+                    title: event.target.value,
+                  }))
+                }
+              />
+              <span className={`save-status ${saveStatus}`}>
+                {saveStatus === "saving"
+                  ? "保存中…"
+                  : saveStatus === "error"
+                    ? "保存できません"
+                    : "この端末に保存済み"}
+              </span>
+            </div>
           </div>
           <div className="editor-header-actions">
             <label className="global-font-size">
@@ -1001,27 +982,10 @@ function EditorCanvas({
               )}
             </div>
             <button onClick={() => setShowFrame(true)}>囲み枠</button>
-            {mode === "product" ? (
-              <button className="pdf-button" onClick={() => setShowPdf(true)}>
-                PDF
-              </button>
-            ) : (
-              <>
-                <button onClick={() => window.print()}>印刷</button>
-                <button
-                  className="locked-feature-button"
-                  onClick={() => setShowProductInfo(true)}
-                >
-                  PDF・保存
-                </button>
-                <button
-                  className="trial-reset-button"
-                  onClick={() => setShowResetTrial(true)}
-                >
-                  白紙に戻す
-                </button>
-              </>
-            )}
+            <button onClick={() => window.print()}>印刷</button>
+            <button className="pdf-button" onClick={() => setShowPdf(true)}>
+              PDF
+            </button>
             <div className="toolbar-popover-wrap">
               <button onClick={() => setShowMore((value) => !value)}>…</button>
               {showMore && (
@@ -1029,15 +993,9 @@ function EditorCanvas({
                   <button onClick={copySelected}>コピー</button>
                   <button onClick={pasteClipboard}>貼り付け</button>
                   <button
-                    onClick={() =>
-                      mode === "product"
-                        ? void exportBackup()
-                        : setShowProductInfo(true)
-                    }
+                    onClick={() => void exportBackup()}
                   >
-                    {mode === "product"
-                      ? "バックアップを書き出す"
-                      : "バックアップ（製品版）"}
+                    バックアップを書き出す
                   </button>
                   <button
                     onClick={() =>
@@ -1075,13 +1033,9 @@ function EditorCanvas({
           <div className="save-error">
             自動保存できません。ブラウザの空き容量をご確認ください。
             <button
-              onClick={() =>
-                mode === "product"
-                  ? void exportBackup()
-                  : setShowProductInfo(true)
-              }
+              onClick={() => void exportBackup()}
             >
-              {mode === "product" ? "バックアップ" : "製品版について"}
+              バックアップ
             </button>
           </div>
         )}
@@ -1196,7 +1150,6 @@ function EditorCanvas({
             <AddMenu
               x={menu.screenX}
               y={menu.screenY}
-              allowCustomItems={mode === "product"}
               onAdd={handleAdd}
               onClose={() => setMenu(undefined)}
             />
@@ -1212,69 +1165,6 @@ function EditorCanvas({
           </span>
         </div>
       </main>
-
-      {showProductInfo && (
-        <div className="modal-backdrop">
-          <div
-            className="modal-card product-info-dialog"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="product-info-title"
-          >
-            <span className="eyebrow">PRODUCT EDITION</span>
-            <h2 id="product-info-title">製品版で、作った図を残せる</h2>
-            <p>
-              関連図を作る基本操作は、お試し版と製品版で同じだよ。製品版では複数の関連図を整理し、専用ファイルやPDFとして保存できる。
-            </p>
-            <ul className="product-feature-list">
-              <li>複数の関連図を保存・分類</li>
-              <li>自由入力ボックスと自分用項目の管理</li>
-              <li>専用ファイルの書き出し・読み込み</li>
-              <li>A4・A3に整えたPDF出力</li>
-            </ul>
-            <p className="trial-data-note">
-              今作っている図は、このブラウザ内に保持されている。製品版の販売は準備中だよ。
-            </p>
-            <div className="modal-actions">
-              <button
-                className="primary-button"
-                onClick={() => setShowProductInfo(false)}
-              >
-                作図に戻る
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {showResetTrial && (
-        <div className="modal-backdrop">
-          <div
-            className="modal-card small-modal"
-            role="dialog"
-            aria-modal="true"
-            aria-labelledby="reset-trial-title"
-          >
-            <span className="eyebrow">RESET CANVAS</span>
-            <h2 id="reset-trial-title">白紙に戻す？</h2>
-            <p>
-              今作っている関連図は削除され、元に戻せない。新しい図を作り始めるときだけ使ってね。
-            </p>
-            <div className="modal-actions">
-              <button onClick={() => setShowResetTrial(false)}>やめる</button>
-              <button
-                className="primary-button delete-confirm"
-                onClick={() => {
-                  setShowResetTrial(false);
-                  onResetTrial();
-                }}
-              >
-                白紙に戻す
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
 
       {showPdf && (
         <PdfDialog

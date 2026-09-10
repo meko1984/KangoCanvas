@@ -7,13 +7,12 @@ import {
   saveCatalogPreferences,
   upsertCatalogItem,
 } from "../catalog-preferences";
-import { CATALOG_ITEMS, CATEGORIES, getCategory } from "../catalog";
+import { CATEGORIES, getCategory } from "../catalog";
 import type { CatalogItem, CategoryId } from "../types";
 
 interface AddMenuProps {
   x: number;
   y: number;
-  allowCustomItems: boolean;
   initialCategory?: CategoryId;
   onAdd: (input: {
     category: CategoryId;
@@ -35,7 +34,6 @@ interface ItemDraft {
 export function AddMenu({
   x,
   y,
-  allowCustomItems,
   initialCategory = "patient",
   onAdd,
   onClose,
@@ -50,20 +48,11 @@ export function AddMenu({
   const [manageMode, setManageMode] = useState(false);
   const [preferences, setPreferences] = useState(loadCatalogPreferences);
   const [draft, setDraft] = useState<ItemDraft>();
-  const availableCategories = useMemo(
-    () =>
-      allowCustomItems
-        ? CATEGORIES
-        : CATEGORIES.filter((item) => item.id !== "neutral"),
-    [allowCustomItems],
-  );
+  const availableCategories = CATEGORIES;
   const category = getCategory(activeCategory);
   const catalogItems = useMemo(
-    () =>
-      allowCustomItems
-        ? resolveCatalogItems(preferences)
-        : CATALOG_ITEMS.filter((item) => item.category !== "neutral"),
-    [allowCustomItems, preferences],
+    () => resolveCatalogItems(preferences),
+    [preferences],
   );
   const searchResults = useMemo(() => {
     const normalized = query.trim().toLocaleLowerCase("ja");
@@ -235,17 +224,15 @@ export function AddMenu({
             }
           }}
         />
-        {allowCustomItems && (
-          <button
-            className={`manage-items-button ${manageMode ? "active" : ""}`}
-            onClick={() => {
-              setManageMode((value) => !value);
-              setDraft(undefined);
-            }}
-          >
-            {manageMode ? "管理を終了" : "項目を管理"}
-          </button>
-        )}
+        <button
+          className={`manage-items-button ${manageMode ? "active" : ""}`}
+          onClick={() => {
+            setManageMode((value) => !value);
+            setDraft(undefined);
+          }}
+        >
+          {manageMode ? "管理を終了" : "項目を管理"}
+        </button>
         <button className="icon-button" onClick={onClose} aria-label="閉じる">
           ×
         </button>
@@ -285,9 +272,7 @@ export function AddMenu({
             <div className="empty-search">
               <strong>登録済み項目は見つかりません</strong>
               <span>
-                {allowCustomItems
-                  ? "分類を選び、「この分類で自由入力」または「項目を管理」を使ってください。"
-                  : "お試し版では登録済みの標準項目から選んでください。配置後の文章は編集できるよ。"}
+                分類を選び、自由入力または「項目を管理」を使ってください。
               </span>
             </div>
           )}
@@ -456,7 +441,7 @@ export function AddMenu({
                     </button>
                     <button onClick={resetItems}>項目を初期状態へ戻す</button>
                   </div>
-                ) : allowCustomItems ? (
+                ) : (
                   <button
                     className="free-input-button"
                     onClick={() =>
@@ -473,10 +458,6 @@ export function AddMenu({
                       <small>分類の色を引き継いで作成</small>
                     </span>
                   </button>
-                ) : (
-                  <div className="trial-catalog-note">
-                    配置したあとは、ボックスを選んで文章を書き換えられるよ。
-                  </div>
                 )}
               </>
             ) : (

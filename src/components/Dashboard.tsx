@@ -63,7 +63,7 @@ export function Dashboard({
           <div className="brand-mark">K</div>
           <div>
             <h1>KangoCanvas</h1>
-            <p>看護学生の思考を、自由につなぐ。</p>
+            <p>看護学生の思考を、自由につなぐ。すべての機能が無料。</p>
           </div>
         </div>
         <div className="header-actions">
